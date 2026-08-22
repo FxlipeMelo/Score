@@ -1,0 +1,12 @@
+services:
+
+    db:
+        image: mysql:9.0
+        container_name: DB_MYSQL
+        env_file:
+            - .env.local
+#        restart: always
+        ports:
+            -   "3306:3306"
+        environment:
+            MYSQL_DATABASE: sports_league
