@@ -47,6 +47,10 @@ class Sport
 
     public function setMaxPlayerPerTeam(int $maxPlayerPerTeam): static
     {
+        if ($maxPlayerPerTeam <= 0) {
+            throw new \InvalidArgumentException("The maximum number of players per team must be a positive integer.");
+        }
+
         $this->maxPlayerPerTeam = $maxPlayerPerTeam;
 
         return $this;
