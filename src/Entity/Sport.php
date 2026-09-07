@@ -15,56 +15,50 @@ class Sport
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    private string $name;
 
     #[ORM\Column]
-    private ?int $maxPlayerPerTeam = null;
+    private int $maxPlayerPerTeam;
 
     #[ORM\Column(length: 255 ,enumType: MatchType::class)]
-    private ?MatchType $matchType = null;
+    private MatchType $matchType;
+
+    public function __construct(string $name, int $maxPlayerPerTeam, MatchType $matchType)
+    {
+        $this->name = $name;
+        $this->maxPlayerPerTeam = $this->assertMaxPlayerPerTeam($maxPlayerPerTeam);
+        $this->matchType = $matchType;
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setName(string $name): static
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function getMaxPlayerPerTeam(): ?int
+    public function getMaxPlayerPerTeam(): int
     {
         return $this->maxPlayerPerTeam;
     }
 
-    public function setMaxPlayerPerTeam(int $maxPlayerPerTeam): static
+    private function assertMaxPlayerPerTeam(int $maxPlayerPerTeam): int //mudei de static para int o retorno da função
     {
         if ($maxPlayerPerTeam <= 0) {
             throw new \InvalidArgumentException("The maximum number of players per team must be a positive integer.");
         }
 
-        $this->maxPlayerPerTeam = $maxPlayerPerTeam;
+        return $this->maxPlayerPerTeam = $maxPlayerPerTeam;
 
-        return $this;
+//        return $this;
     }
 
-    public function getMatchType(): ?MatchType
+    public function getMatchType(): MatchType
     {
         return $this->matchType;
     }
 
-    public function setMatchType(MatchType $matchType): static
-    {
-        $this->matchType = $matchType;
-
-        return $this;
-    }
 }

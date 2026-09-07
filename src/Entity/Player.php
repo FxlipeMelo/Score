@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\PlayerRepository;
-use App\Type\CpfType;
 use App\ValueObject\Cpf;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -17,19 +16,22 @@ class Player
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    private string $name;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
-    private ?\DateTimeImmutable $birthDate = null;
+    private \DateTimeImmutable $birthDate;
 
     #[ORM\Column]
-    private ?float $height = null;
+    private float $height;
 
     #[ORM\Column(type: 'cpf_type', length: 14)]
     private Cpf $cpf;
 
-    public function __construct(Cpf $cpf)
+    public function __construct(string $name, \DateTimeImmutable $birthDate, float $height, Cpf $cpf)
     {
+        $this->name = $name;
+        $this->birthDate = $birthDate;
+        $this->height = $height;
         $this->cpf = $cpf;
     }
 
@@ -38,51 +40,24 @@ class Player
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setName(string $name): static
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function getBirthDate(): ?\DateTimeImmutable
+    public function getBirthDate(): \DateTimeImmutable
     {
         return $this->birthDate;
     }
 
-    public function setBirthDate(\DateTimeImmutable $birthDate): static
-    {
-        $this->birthDate = $birthDate;
-
-        return $this;
-    }
-
-    public function getHeight(): ?float
+    public function getHeight(): float
     {
         return $this->height;
     }
 
-    public function setHeight(float $height): static
-    {
-        $this->height = $height;
-
-        return $this;
-    }
-
-    public function getCpf(): ?Cpf
+    public function getCpf(): Cpf
     {
         return $this->cpf;
     }
 
-    public function setCpf(Cpf $cpf): static
-    {
-        $this->cpf = $cpf;
-
-        return $this;
-    }
 }

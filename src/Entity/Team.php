@@ -15,18 +15,20 @@ class Team
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    private string $name;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
-    private ?\DateTimeImmutable $dateCreated = null;
+    private \DateTimeImmutable $dateCreated;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Sport $sport = null;
+    private Sport $sport;
 
-    public function __construct()
+    public function __construct(string $name, Sport $sport)
     {
+        $this->name = $name;
         $this->dateCreated = new \DateTimeImmutable();
+        $this->sport = $sport;
     }
 
     public function getId(): ?int
@@ -34,32 +36,18 @@ class Team
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setName(string $name): static
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function getDateCreated(): ?\DateTimeImmutable
+    public function getDateCreated(): \DateTimeImmutable
     {
         return $this->dateCreated;
     }
 
-    public function getSport(): ?Sport
+    public function getSport(): Sport
     {
         return $this->sport;
-    }
-
-    public function setSport(?Sport $sport): static
-    {
-        $this->sport = $sport;
-
-        return $this;
     }
 }
