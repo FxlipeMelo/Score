@@ -32,12 +32,19 @@ class Team
     #[ORM\OneToMany(targetEntity: TeamRoster::class, mappedBy: 'team')]
     private Collection $teamRosters;
 
+    /**
+     * @var Collection<int, Registration>
+     */
+    #[ORM\OneToMany(targetEntity: Registration::class, mappedBy: 'team')]
+    private Collection $registrations;
+
     public function __construct(string $name, Sport $sport)
     {
         $this->name = $name;
         $this->dateCreated = new \DateTimeImmutable();
         $this->sport = $sport;
         $this->teamRosters = new ArrayCollection();
+        $this->registrations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -75,5 +82,13 @@ class Team
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Registration>
+     */
+    public function getRegistrations(): Collection
+    {
+        return $this->registrations;
     }
 }

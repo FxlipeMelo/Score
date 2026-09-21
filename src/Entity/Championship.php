@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Enum\ChampionshipStatus;
 use App\Repository\ChampionshipRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ChampionshipRepository::class)]
@@ -33,6 +35,12 @@ class Championship
     #[ORM\JoinColumn(nullable: false)]
     private Sport $sport;
 
+    /**
+     * @var Collection<int, Registration>
+     */
+    #[ORM\OneToMany(targetEntity: Registration::class, mappedBy: 'championship')]
+    private Collection $registrations;
+
     public function __construct(string $name, \DateTimeImmutable $dateStart, \DateTimeImmutable $dateEnd, Sport $sport)
     {
         $this->name = $name;
@@ -41,6 +49,7 @@ class Championship
         $this->dateEnd = $this->assertDateStartLessThanDateEnd($dateStart, $dateEnd);
         $this->status = ChampionshipStatus::PENDING;
         $this->sport = $sport;
+        $this->registrations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -95,6 +104,26 @@ class Championship
         }
 
         throw new \InvalidArgumentException('Date start must be less than date end');
+    }
+
+    public function enrollTeam(Team $team): Registration
+    {
+        if ($this->sport !== $team->getSport()) {
+            throw new \InvalidArgumentException('The team and the championship belong to different sports.');
+        }
+
+        $registration = new Registration($team, $this);
+        $this->registrations->add($registration);
+
+        return $registration;
+    }
+
+    /**
+     * @return Collection<int, Registration>
+     */
+    public function getRegistrations(): Collection
+    {
+        return $this->registrations;
     }
 
 }
