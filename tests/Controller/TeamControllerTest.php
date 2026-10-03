@@ -2,20 +2,16 @@
 
 namespace App\Tests\Controller;
 
-use App\Entity\Sport;
-use App\Enum\MatchType;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\SportRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class TeamControllerTest extends WebTestCase
 {
-    public function testPersistTeam(): void
+    public function testPersistTeamSuccessfullyReturns201()
     {
         $client = static::createClient();
-        $entityManager = $client->getContainer()->get(EntityManagerInterface::class);
-        $sport =  new Sport('Futsal', 15, MatchType::TIME);
-        $entityManager->persist($sport);
-        $entityManager->flush();
+        $sportRepository = $client->getContainer()->get(SportRepository::class);
+        $sport = $sportRepository->findOneBy(['name' => 'Sport 0']);
 
         $client->jsonRequest('POST', '/api/v1/score/teams', [
             'name' => 'Team test',
@@ -23,6 +19,17 @@ class TeamControllerTest extends WebTestCase
         ]);
 
         $this->assertResponseStatusCodeSame(201);
+    }
 
+    public function testSportDoesNotExistReturns404()
+    {
+        $client = static::createClient();
+
+        $client->jsonRequest('POST', '/api/v1/score/teams', [
+            'name' => 'Team test',
+            'sportId' => 99999,
+        ]);
+
+        $this->assertResponseStatusCodeSame(404);
     }
 }
