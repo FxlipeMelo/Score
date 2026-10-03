@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests;
+namespace App\Tests\Entity;
 
 use App\Tests\Mother\SportMother;
 use PHPUnit\Framework\TestCase;
