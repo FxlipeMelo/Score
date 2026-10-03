@@ -36,4 +36,20 @@ class ChampionshipControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(404);
     }
+
+    public function testCreateChampionshipDateEndBeforeDateStartReturns422()
+    {
+        $client = static::createClient();
+        $sportRepository = static::getContainer()->get(SportRepository::class);
+        $sport = $sportRepository->findOneBy(['name' => 'Sport 0']);
+
+        $client->jsonRequest('POST', '/api/v1/score/championships', [
+            'name' => 'Championship test',
+            'dateStart' => '2020-01-01',
+            'dateEnd' => '2019-01-02',
+            'sportId' => $sport->getId(),
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
 }
