@@ -14,4 +14,18 @@ class PlayerTest extends TestCase
 
         $this->assertInstanceOf(Player::class, $player);
     }
+
+    public function testThrowsExceptionWhenBirthDateIsInTheFuture()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $player = PlayerMother::create(birthDate: new \DateTimeImmutable('2030-05-01'));
+    }
+
+    public function testCannotCreatePlayerWithAgeUnderSix()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $player = PlayerMother::create(birthDate: new \DateTimeImmutable('2024-05-01'));
+    }
 }

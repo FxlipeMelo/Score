@@ -38,7 +38,7 @@ class Player
     public function __construct(string $name, \DateTimeImmutable $birthDate, float $height, Cpf $cpf)
     {
         $this->name = $name;
-        $this->birthDate = $birthDate;
+        $this->birthDate = $this->assertBirthDateValidate($birthDate);
         $this->height = $height;
         $this->cpf = $cpf;
         $this->teamRosters = new ArrayCollection();
@@ -80,5 +80,16 @@ class Player
         }
 
         return $this;
+    }
+
+    private function assertBirthDateValidate(\DateTimeImmutable $birthDate): \DateTimeImmutable
+    {
+        $dateVerification = new \DateTimeImmutable('-6 years');
+
+        if ($birthDate > $dateVerification) {
+            throw new \InvalidArgumentException('The date of birth must be greater than six and cannot be a future date.');
+        }
+
+        return $birthDate;
     }
 }
