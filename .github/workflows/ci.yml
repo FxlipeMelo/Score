@@ -18,7 +18,7 @@ jobs:
             - uses: "ramsey/composer-install@v2"
 
             - name: Setup test database
-              run: php bin/console doctrine:schema:update --force --env=test
+              run: php bin/console doctrine:schema:update --force --env=test && php bin/console doctrine:fixtures:load --env=test --no-interaction
 
             - name: Run test suite
               run: php bin/phpunit
