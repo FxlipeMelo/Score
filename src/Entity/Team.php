@@ -77,7 +77,13 @@ class Team
 
     public function addTeamRoster(TeamRoster $teamRoster): static
     {
+
         if (!$this->teamRosters->contains($teamRoster)) {
+            if ($this->teamRosters->exists(function ($key, $element) use ($teamRoster) {
+                return $element->getShirtNumber() === $teamRoster->getShirtNumber();
+            })) {
+                throw new \DomainException('Cannot add two players with same shirt number.');
+            }
             $this->teamRosters->add($teamRoster);
         }
 
