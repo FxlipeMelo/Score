@@ -80,6 +80,11 @@ class Team
 
         if (!$this->teamRosters->contains($teamRoster)) {
             if ($this->teamRosters->exists(function ($key, $element) use ($teamRoster) {
+                return $element->getPlayer() === $teamRoster->getPlayer();
+            })) {
+                throw new \DomainException('Cannot add same players twice');
+            }
+            if ($this->teamRosters->exists(function ($key, $element) use ($teamRoster) {
                 return $element->getShirtNumber() === $teamRoster->getShirtNumber();
             })) {
                 throw new \DomainException('Cannot add two players with same shirt number.');

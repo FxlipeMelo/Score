@@ -30,6 +30,19 @@ class TeamTest extends TestCase
 
         $team->addTeamRoster($teamRoster1);
         $team->addTeamRoster($teamRoster2);
+    }
 
+    public function testCannotAddSamePlayerTwiceDomainException()
+    {
+        $this->expectException(\DomainException::class);
+
+        $team = TeamMother::create();
+        $player = PlayerMother::create(name: 'Player 1');
+
+        $teamRoster1 = TeamRosterMother::create(player: $player, shirtNumber: 9);
+        $teamRoster2 = TeamRosterMother::create(player: $player, shirtNumber: 11);
+
+        $team->addTeamRoster($teamRoster1);
+        $team->addTeamRoster($teamRoster2);
     }
 }
