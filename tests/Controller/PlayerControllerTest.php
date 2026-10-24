@@ -33,4 +33,18 @@ class PlayerControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(422);
     }
+
+    public function testAddPlayerWithCPFInvalidReturns422()
+    {
+        $client = static::createClient();
+
+        $client->jsonRequest('POST', '/api/v1/score/players', [
+            'name' => 'Player 1',
+            'birthDate' => '2025-01-01',
+            'height' => 1.72,
+            'cpf' => '111.111.111-11'
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
 }

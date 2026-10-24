@@ -24,7 +24,11 @@ class PlayerController extends AbstractController
     #[OA\Response(response: 422, description: 'The date of birth must be greater than six and cannot be a future date')]
     public function create(#[MapRequestPayload] CreatePlayerDTO $playerDTO): JsonResponse
     {
-        $cpf = new Cpf($playerDTO->cpf);
+        try {
+            $cpf = new Cpf($playerDTO->cpf);
+        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+        }
 
         try {
             $player = new Player($playerDTO->name, $playerDTO->birthDate, $playerDTO->height, $cpf);
