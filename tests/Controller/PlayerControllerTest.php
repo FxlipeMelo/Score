@@ -2,15 +2,23 @@
 
 namespace App\Tests\Controller;
 
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class PlayerControllerTest extends WebTestCase
 {
-    public function testPersistPlayerSuccessfullyReturns201()
-    {
-        $client = static::createClient();
+    private KernelBrowser $client;
 
-        $client->jsonRequest('POST', '/api/v1/score/players', [
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->client = static::createClient();
+    }
+
+    public function testPersistPlayerSuccessfullyReturns201(): void
+    {
+        $this->client->jsonRequest('POST', '/api/v1/score/players', [
             'name' => 'Player 1',
             'birthDate' => '1990-01-01',
             'height' => 1.72,
@@ -20,13 +28,11 @@ class PlayerControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(201);
     }
 
-    public function testCreatePlayerWithBirthDateInvalidReturns422()
+    public function testCreatePlayerWithBirthDateInvalidReturns422(): void
     {
-        $client = static::createClient();
-
-        $client->jsonRequest('POST', '/api/v1/score/players', [
+        $this->client->jsonRequest('POST', '/api/v1/score/players', [
             'name' => 'Player 1',
-            'birthDate' => '2025-01-01',
+            'birthDate' => new \DateTimeImmutable('- 5 years - 11 months - 29 days')->format('Y-m-d'),
             'height' => 1.72,
             'cpf' => '217.965.600-90'
         ]);
@@ -34,13 +40,11 @@ class PlayerControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(422);
     }
 
-    public function testAddPlayerWithCPFInvalidReturns422()
+    public function testAddPlayerWithCPFInvalidReturns422(): void
     {
-        $client = static::createClient();
-
-        $client->jsonRequest('POST', '/api/v1/score/players', [
+        $this->client->jsonRequest('POST', '/api/v1/score/players', [
             'name' => 'Player 1',
-            'birthDate' => '2025-01-01',
+            'birthDate' => '1990-01-01',
             'height' => 1.72,
             'cpf' => '111.111.111-11'
         ]);
