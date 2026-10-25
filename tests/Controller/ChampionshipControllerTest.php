@@ -2,51 +2,75 @@
 
 namespace App\Tests\Controller;
 
-use App\Repository\SportRepository;
+use App\Entity\Sport;
+use App\Tests\Mother\SportMother;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ChampionshipControllerTest extends WebTestCase
 {
+    private KernelBrowser $client;
+    private EntityManagerInterface $entityManager;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->client = static::createClient();
+        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        $this->entityManager->close();
+    }
+
+    private function createStandardSport(): Sport
+    {
+        $sport = SportMother::create();
+        $this->entityManager->persist($sport);
+        $this->entityManager->flush();
+
+        return $sport;
+    }
+
     public function testPersistChampionshipSuccessfullyReturns201(): void
     {
-        $client = static::createClient();
-        $sportRepository = static::getContainer()->get(SportRepository::class);
-        $sport = $sportRepository->findOneBy(['name' => 'Sport 0']);
+        $sport = $this->createStandardSport();
 
-        $client->jsonRequest('POST', '/api/v1/score/championships', [
+        $this->client->jsonRequest('POST', '/api/v1/score/championships', [
             'name' => 'Championship test',
-            'dateStart' => '2020-01-01',
-            'dateEnd' => '2020-01-02',
+            'dateStart' => new \DateTimeImmutable('now')->format('Y-m-d'),
+            'dateEnd' => new \DateTimeImmutable('+ 5 days')->format('Y-m-d'),
             'sportId' => $sport->getId(),
         ]);
 
         $this->assertResponseStatusCodeSame(201);
     }
 
-    public function testSportDoesNotExistReturns404()
+    public function testSportDoesNotExistReturns404(): void
     {
-        $client = static::createClient();
-
-        $client->jsonRequest('POST', '/api/v1/score/championships', [
+        $this->client->jsonRequest('POST', '/api/v1/score/championships', [
             'name' => 'Championship test',
-            'dateStart' => '2020-01-01',
-            'dateEnd' => '2020-01-02',
-            'sportId' => 99999
+            'dateStart' => new \DateTimeImmutable('now')->format('Y-m-d'),
+            'dateEnd' => new \DateTimeImmutable('+ 5 days')->format('Y-m-d'),
+            'sportId' => PHP_INT_MAX,
         ]);
 
         $this->assertResponseStatusCodeSame(404);
     }
 
-    public function testCreateChampionshipDateEndBeforeDateStartReturns422()
+    public function testCreateChampionshipDateEndBeforeDateStartReturns422(): void
     {
-        $client = static::createClient();
-        $sportRepository = static::getContainer()->get(SportRepository::class);
-        $sport = $sportRepository->findOneBy(['name' => 'Sport 0']);
+        $sport = $this->createStandardSport();
 
-        $client->jsonRequest('POST', '/api/v1/score/championships', [
+        $this->client->jsonRequest('POST', '/api/v1/score/championships', [
             'name' => 'Championship test',
-            'dateStart' => '2020-01-01',
-            'dateEnd' => '2019-01-02',
+            'dateStart' => new \DateTimeImmutable('+ 10 days')->format('Y-m-d'),
+            'dateEnd' => new \DateTimeImmutable('+ 5 days')->format('Y-m-d'),
             'sportId' => $sport->getId(),
         ]);
 
