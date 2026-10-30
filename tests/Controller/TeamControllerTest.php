@@ -2,18 +2,46 @@
 
 namespace App\Tests\Controller;
 
-use App\Repository\SportRepository;
+use App\Entity\Sport;
+use App\Tests\Mother\SportMother;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class TeamControllerTest extends WebTestCase
 {
-    public function testPersistTeamSuccessfullyReturns201()
-    {
-        $client = static::createClient();
-        $sportRepository = $client->getContainer()->get(SportRepository::class);
-        $sport = $sportRepository->findOneBy(['name' => 'Sport 0']);
+    private KernelBrowser $client;
+    private EntityManagerInterface $entityManager;
 
-        $client->jsonRequest('POST', '/api/v1/score/teams', [
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->client = static::createClient();
+        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        $this->entityManager->close();
+    }
+
+    private function createStandardSport(): Sport
+    {
+        $sport = SportMother::create();
+        $this->entityManager->persist($sport);
+        $this->entityManager->flush();
+
+        return $sport;
+    }
+
+    public function testPersistTeamSuccessfullyReturns201(): void
+    {
+        $sport = $this->createStandardSport();
+
+        $this->client->jsonRequest('POST', '/api/v1/score/teams', [
             'name' => 'Team test',
             'sportId' => $sport->getId(),
         ]);
@@ -21,15 +49,25 @@ class TeamControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(201);
     }
 
-    public function testSportDoesNotExistReturns404()
+    public function testSportDoesNotExistReturns404(): void
     {
-        $client = static::createClient();
-
-        $client->jsonRequest('POST', '/api/v1/score/teams', [
+        $this->client->jsonRequest('POST', '/api/v1/score/teams', [
             'name' => 'Team test',
-            'sportId' => 99999,
+            'sportId' => PHP_INT_MAX,
         ]);
 
         $this->assertResponseStatusCodeSame(404);
+    }
+
+    public function testCannotPersistTeamNameIsBlankReturns422(): void
+    {
+        $sport = $this->createStandardSport();
+
+        $this->client->jsonRequest('POST', '/api/v1/score/teams', [
+            'name' => '',
+            'sportId' => $sport->getId(),
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
     }
 }
