@@ -2,8 +2,8 @@
 
 namespace App\Tests\Controller;
 
-use App\Repository\PlayerRepository;
-use App\Repository\TeamRepository;
+use App\Entity\Player;
+use App\Entity\Team;
 use App\Tests\Mother\PlayerMother;
 use App\Tests\Mother\SportMother;
 use App\Tests\Mother\TeamMother;
@@ -30,22 +30,32 @@ class TeamRosterControllerTest extends WebTestCase
         $this->entityManager->close();
     }
 
-    private function createStandardTeamAndPlayer(): array
+    private function createStandardTeam(): Team
     {
         $sport = SportMother::create();
         $team = TeamMother::create(sport: $sport);
-        $player = PlayerMother::create();
         $this->entityManager->persist($sport);
         $this->entityManager->persist($team);
+        $this->entityManager->flush();
+
+        return $team;
+    }
+
+    private function createStandardPlayer(): Player
+    {
+        $player = PlayerMother::create();
         $this->entityManager->persist($player);
         $this->entityManager->flush();
 
-        return [$team, $player];
+        return $player;
     }
 
-    public function testTeamRosterSuccessfullyReturn201()
+
+
+    public function testTeamRosterSuccessfullyReturn201(): void
     {
-        [$team, $player] = $this->createStandardTeamAndPlayer();
+        $team = $this->createStandardTeam();
+        $player = $this->createStandardPlayer();
 
         $this->client->jsonRequest('POST', '/api/v1/score/teams/' . $team->getId() . '/players', [
             'shirtNumber' => 10,
@@ -55,11 +65,11 @@ class TeamRosterControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(201);
     }
 
-    public function testReturn404WhenTeamDoesNotExist()
+    public function testReturn404WhenTeamDoesNotExist(): void
     {
-        [, $player] = $this->createStandardTeamAndPlayer();
+        $player = $this->createStandardPlayer();
 
-        $this->client->jsonRequest('POST', '/api/v1/score/teams/' . 999999 . '/players', [
+        $this->client->jsonRequest('POST', '/api/v1/score/teams/' . PHP_INT_MAX . '/players', [
             'shirtNumber' => 10,
             'playerID' => $player->getId(),
         ]);
@@ -67,21 +77,22 @@ class TeamRosterControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
     }
 
-    public function testReturn404WhenPlayerDoesNotExist()
+    public function testReturn404WhenPlayerDoesNotExist(): void
     {
-        [$team, ] = $this->createStandardTeamAndPlayer();
+        $team = $this->createStandardTeam();
 
         $this->client->jsonRequest('POST', '/api/v1/score/teams/' . $team->getId() . '/players', [
             'shirtNumber' => 10,
-            'playerID' => 999999,
+            'playerID' => PHP_INT_MAX,
         ]);
 
         $this->assertResponseStatusCodeSame(404);
     }
 
-    public function testCannotAddSamePlayersTwiceReturn409()
+    public function testCannotAddSamePlayersTwiceReturn409(): void
     {
-        [$team, $player] = $this->createStandardTeamAndPlayer();
+        $team = $this->createStandardTeam();
+        $player = $this->createStandardPlayer();
 
         $this->client->jsonRequest('POST', '/api/v1/score/teams/' . $team->getId() . '/players', [
             'shirtNumber' => 10,
@@ -96,12 +107,11 @@ class TeamRosterControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(409);
     }
 
-    public function testCannotAddTwoPlayersWithSameShirtNumberReturn409()
+    public function testCannotAddTwoPlayersWithSameShirtNumberReturn409(): void
     {
-        [$team, $player] = $this->createStandardTeamAndPlayer();
-        $player2 = PlayerMother::create();
-        $this->entityManager->persist($player2);
-        $this->entityManager->flush();
+        $team = $this->createStandardTeam();
+        $player = $this->createStandardPlayer();
+        $player2 = $this->createStandardPlayer();
 
         $this->client->jsonRequest('POST', '/api/v1/score/teams/' . $team->getId() . '/players', [
             'shirtNumber' => 10,
