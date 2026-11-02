@@ -98,4 +98,21 @@ class RegistrationControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(400);
     }
+
+    public function testCannotRegisterSameTeamInSameChampionshipTwiceReturns422(): void
+    {
+        $sport = $this->createStandardSport();
+        $team = $this->createStandardTeam($sport);
+        $championship = $this->createStandardChampionship($sport);
+
+        $this->client->jsonRequest('POST', '/api/v1/score/championships/' . $championship->getId() . '/registrations', [
+            'teamId' => $team->getId(),
+        ]);
+
+        $this->client->jsonRequest('POST', '/api/v1/score/championships/' . $championship->getId() . '/registrations', [
+            'teamId' => $team->getId(),
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
 }
