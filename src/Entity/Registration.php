@@ -2,12 +2,14 @@
 
 namespace App\Entity;
 
-use App\Enum\MatchType;
 use App\Enum\RegistrationStatus;
 use App\Repository\RegistrationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: RegistrationRepository::class)]
+#[ORM\UniqueConstraint(name: 'unique_register', fields: ['team', 'championship'])]
+#[UniqueEntity(fields: ['team', 'championship'], message: 'This team is already registered for this championship.')]
 class Registration
 {
     #[ORM\Id]
