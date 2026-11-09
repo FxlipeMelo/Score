@@ -4,9 +4,7 @@ namespace App\Controller;
 
 use App\DTO\TeamRosterDTO;
 use App\Entity\Team;
-use App\Entity\TeamRoster;
-use App\Repository\PlayerRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Handler\TeamRosterHandler;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,10 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/v1/score')]
 final class TeamRosterController extends AbstractController
 {
-    public function __construct(
-        private readonly PlayerRepository $playerRepository,
-        private readonly EntityManagerInterface $entityManager,
-    )
+    public function __construct(private readonly TeamRosterHandler $teamRosterHandler)
     {
     }
 
@@ -29,22 +24,14 @@ final class TeamRosterController extends AbstractController
     #[OA\Response(response: 409, description: 'Player already exists or two players with same shirt number')]
     public function addTeamRoster(#[MapRequestPayload] TeamRosterDTO $teamRosterDTO, Team $team): JsonResponse
     {
-        $player = $this->playerRepository->find($teamRosterDTO->playerID);
-
-        if ($player === null) {
-            return new JsonResponse(['message' => 'Player not found'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
-        $teamRoster = new TeamRoster($teamRosterDTO->shirtNumber, $team, $player);
-        $this->entityManager->persist($teamRoster);
-
         try {
-            $team->addTeamRoster($teamRoster);
-            $this->entityManager->flush();
+            $teamRoster = ($this->teamRosterHandler)($teamRosterDTO, $team);
+
+            return new JsonResponse(['message' => 'Team roster added', 'teamRoster' => $teamRoster->getId()], JsonResponse::HTTP_CREATED);
+        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(['message' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
         } catch (\DomainException $e) {
             return new JsonResponse(['message' => $e->getMessage()], JsonResponse::HTTP_CONFLICT);
         }
-
-        return new JsonResponse(['message' => 'Team roster added'], JsonResponse::HTTP_CREATED);
     }
 }
