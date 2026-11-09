@@ -84,7 +84,7 @@ class RegistrationControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
     }
 
-    public function testRegisterTeamWithDifferentSportThanChampionshipReturns400(): void
+    public function testRegisterTeamWithDifferentSportThanChampionshipReturns422(): void
     {
         $sport1 = $this->createStandardSport();
         $sport2 = $this->createStandardSport();
@@ -96,7 +96,7 @@ class RegistrationControllerTest extends WebTestCase
             'teamId' => $team->getId(),
         ]);
 
-        $this->assertResponseStatusCodeSame(400);
+        $this->assertResponseStatusCodeSame(422);
     }
 
     public function testCannotRegisterSameTeamInSameChampionshipTwiceReturns422(): void

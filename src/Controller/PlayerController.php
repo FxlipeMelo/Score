@@ -3,9 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\CreatePlayerDTO;
-use App\Entity\Player;
-use App\ValueObject\Cpf;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Handler\CreatePlayerHandler;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/v1/score')]
 class PlayerController extends AbstractController
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager)
+    public function __construct(private readonly CreatePlayerHandler $createPlayerHandler)
     {
     }
 
@@ -25,19 +23,12 @@ class PlayerController extends AbstractController
     public function create(#[MapRequestPayload] CreatePlayerDTO $playerDTO): JsonResponse
     {
         try {
-            $cpf = new Cpf($playerDTO->cpf);
-        } catch (\InvalidArgumentException $e) {
-            return new JsonResponse(['error' => $e->getMessage()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
-        }
+            $player = ($this->createPlayerHandler)($playerDTO);
 
-        try {
-            $player = new Player($playerDTO->name, $playerDTO->birthDate, $playerDTO->height, $cpf);
-            $this->entityManager->persist($player);
-            $this->entityManager->flush();
-        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(['message' => 'Player created', 'player' => $player->getId()], JsonResponse::HTTP_CREATED);
+        } catch (\DomainException $e) {
             return new JsonResponse(['message' => $e->getMessage()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        return new JsonResponse(['message' => 'Player created'], JsonResponse::HTTP_CREATED);
     }
 }

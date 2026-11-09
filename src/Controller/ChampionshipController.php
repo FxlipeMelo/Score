@@ -3,20 +3,17 @@
 namespace App\Controller;
 
 use App\DTO\CreateChampionshipDTO;
-use App\Entity\Championship;
-use App\Repository\SportRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Handler\CreateChampionshipHandler;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/v1/score')]
 final class ChampionshipController extends AbstractController
 {
-    public function __construct(private readonly SportRepository $sportRepository, private readonly EntityManagerInterface $entityManager)
+    public function __construct(private readonly CreateChampionshipHandler $createChampionshipHandler)
     {
     }
 
@@ -24,22 +21,16 @@ final class ChampionshipController extends AbstractController
     #[OA\Response(response: 201, description: 'Successful')]
     #[OA\Response(response: 404, description: 'Sport not found')]
     #[OA\Response(response: 422, description: 'Date end before date start')]
-    public function create(#[MapRequestPayload] CreateChampionshipDTO $championshipDTO): JsonResponse
+    public function create(#[MapRequestPayload] CreateChampionshipDTO $createChampionshipDTO): JsonResponse
     {
-        $sport = $this->sportRepository->find($championshipDTO->sportId);
-
-        if ($sport === null) {
-            throw new NotFoundHttpException('Sport could not be found.');
-        }
-
         try {
-            $championship = new Championship($championshipDTO->name, $championshipDTO->dateStart, $championshipDTO->dateEnd, $sport);
-            $this->entityManager->persist($championship);
-            $this->entityManager->flush();
+            $championship = ($this->createChampionshipHandler)($createChampionshipDTO);
+
+            return new JsonResponse(['message' => 'Create Championship', 'championship' => $championship->getId()], JsonResponse::HTTP_CREATED);
         } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(['message' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
+        } catch (\DomainException $e) {
             return new JsonResponse(['message' => $e->getMessage()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }
-
-        return new JsonResponse(['message' => 'Create Championship', 'championship' => $championship->getId()], JsonResponse::HTTP_CREATED);
     }
 }

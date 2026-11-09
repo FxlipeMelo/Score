@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\DTO\CreateSportDTO;
 use App\Entity\Sport;
+use App\Handler\CreateSportHandler;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
@@ -15,7 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/v1/score')]
 final class SportController extends AbstractController
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager)
+    public function __construct(private readonly CreateSportHandler $createSportHandler)
     {
     }
 
@@ -25,15 +26,12 @@ final class SportController extends AbstractController
     #[OA\Response(response: 422, description: 'Validation error for the provided data')]
     public function create(#[MapRequestPayload] CreateSportDTO $createSportDTO): JsonResponse
     {
-        $sport = new Sport($createSportDTO->name, $createSportDTO->maxPlayerPerTeam, $createSportDTO->matchType);
-
         try {
-            $this->entityManager->persist($sport);
-            $this->entityManager->flush();
-        } catch (UniqueConstraintViolationException $e) {
+            $sport = ($this->createSportHandler)($createSportDTO);
+
+            return new JsonResponse(['message' => 'Sport created', 'sport' => $sport->getId()], JsonResponse::HTTP_CREATED);
+        } catch (\RuntimeException $e) {
             return new JsonResponse(['message' => 'This sport already exists'], JsonResponse::HTTP_CONFLICT);
         }
-
-        return new JsonResponse(['message' => 'Sport created', 'sport' => $sport->getId()], JsonResponse::HTTP_CREATED);
     }
 }
