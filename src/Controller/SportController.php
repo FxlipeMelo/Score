@@ -3,10 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\CreateSportDTO;
-use App\Entity\Sport;
 use App\Handler\CreateSportHandler;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -30,7 +27,7 @@ final class SportController extends AbstractController
             $sport = ($this->createSportHandler)($createSportDTO);
 
             return new JsonResponse(['message' => 'Sport created', 'sport' => $sport->getId()], JsonResponse::HTTP_CREATED);
-        } catch (\RuntimeException $e) {
+        } catch (\DomainException $e) {
             return new JsonResponse(['message' => 'This sport already exists'], JsonResponse::HTTP_CONFLICT);
         }
     }

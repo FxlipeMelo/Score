@@ -4,6 +4,7 @@ namespace App\Handler;
 
 use App\DTO\CreateSportDTO;
 use App\Entity\Sport;
+use App\Exception\Domain\SportAlreadyExistsException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -21,7 +22,7 @@ class CreateSportHandler
             $this->entityManager->persist($sport);
             $this->entityManager->flush();
         } catch (UniqueConstraintViolationException $e) {
-            throw new \RuntimeException('Unique constraint violation: ' . $e->getMessage());
+            throw new SportAlreadyExistsException('Unique constraint violation: ' . $e->getMessage());
         }
 
         return $sport;
