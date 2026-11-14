@@ -22,7 +22,7 @@ class CreateSportHandler
             $this->entityManager->persist($sport);
             $this->entityManager->flush();
         } catch (UniqueConstraintViolationException $e) {
-            throw new SportAlreadyExistsException('Unique constraint violation: ' . $e->getMessage());
+            throw new SportAlreadyExistsException("Sport {$sport->getName()} already exists");
         }
 
         return $sport;
