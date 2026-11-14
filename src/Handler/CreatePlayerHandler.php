@@ -17,14 +17,9 @@ class CreatePlayerHandler
     {
         $cpf = new Cpf($createPlayerDTO->cpf);
 
-
-        try {
-            $player = new Player($createPlayerDTO->name, $createPlayerDTO->birthDate, $createPlayerDTO->height, $cpf);
-            $this->entityManager->persist($player);
-            $this->entityManager->flush();
-        } catch (\InvalidArgumentException $e) {
-            throw new \DomainException($e->getMessage());
-        }
+        $player = new Player($createPlayerDTO->name, $createPlayerDTO->birthDate, $createPlayerDTO->height, $cpf);
+        $this->entityManager->persist($player);
+        $this->entityManager->flush();
 
         return $player;
     }
