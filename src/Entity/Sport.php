@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Enum\MatchType;
+use App\Exception\Domain\InvalidMaxPlayerPerTeamException;
 use App\Repository\SportRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -45,15 +46,13 @@ class Sport
         return $this->maxPlayerPerTeam;
     }
 
-    private function assertMaxPlayerPerTeam(int $maxPlayerPerTeam): int //mudei de static para int o retorno da função
+    private function assertMaxPlayerPerTeam(int $maxPlayerPerTeam): int
     {
         if ($maxPlayerPerTeam <= 0) {
-            throw new \InvalidArgumentException("The maximum number of players per team must be a positive integer.");
+            throw new InvalidMaxPlayerPerTeamException("The maximum number of players per team must be a positive integer.");
         }
 
-        return $this->maxPlayerPerTeam = $maxPlayerPerTeam;
-
-//        return $this;
+        return $maxPlayerPerTeam;
     }
 
     public function getMatchType(): MatchType
