@@ -4,6 +4,7 @@ namespace App\Handler;
 
 use App\DTO\CreateTeamDTO;
 use App\Entity\Team;
+use App\Exception\Application\SportNotFoundException;
 use App\Repository\SportRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -21,7 +22,7 @@ class CreateTeamHandler
         $sport = $this->sportRepository->find($createTeamDTO->sportId);
 
         if ($sport === null) {
-            throw new \InvalidArgumentException("Sport $createTeamDTO->sportId does not exist");
+            throw new SportNotFoundException("Sport $createTeamDTO->sportId does not exist");
         }
 
         $team = new Team($createTeamDTO->name, $sport);
