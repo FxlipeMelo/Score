@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Exception\Domain\InvalidBirthDateException;
 use App\Repository\PlayerRepository;
 use App\ValueObject\Cpf;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -87,7 +88,7 @@ class Player
         $dateVerification = new \DateTimeImmutable('-6 years');
 
         if ($birthDate > $dateVerification) {
-            throw new \InvalidArgumentException('The date of birth must be greater than six and cannot be a future date.');
+            throw new InvalidBirthDateException('The date of birth must be greater than six and cannot be a future date.');
         }
 
         return $birthDate;
