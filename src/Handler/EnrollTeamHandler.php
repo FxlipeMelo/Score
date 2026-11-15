@@ -6,16 +6,16 @@ use App\DTO\EnrollTeamDTO;
 use App\Entity\Championship;
 use App\Entity\Registration;
 use App\Exception\Application\TeamNotFoundException;
+use App\Exception\Domain\TeamIsRegisteredThisChampionshipException;
 use App\Repository\TeamRepository;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class EnrollTeamHandler
 {
     public function __construct(
         private readonly TeamRepository $teamRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly ValidatorInterface $validator,
     )
     {
     }
@@ -29,14 +29,13 @@ class EnrollTeamHandler
         }
 
         $enrollTeam = $championship->enrollTeam($team);
-        $errors = $this->validator->validate($enrollTeam);
 
-        if (count($errors) > 0) {
-            throw new \DomainException("Validation failed" . $errors[0]->getMessage());
+        try {
+            $this->entityManager->persist($enrollTeam);
+            $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            throw new TeamIsRegisteredThisChampionshipException('This team is already registered for this championship.');
         }
-
-        $this->entityManager->persist($enrollTeam);
-        $this->entityManager->flush();
 
         return $enrollTeam;
     }
