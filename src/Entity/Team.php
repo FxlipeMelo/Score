@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Exception\Domain\SamePlayerTwiceException;
+use App\Exception\Domain\TwoPlayersSameShirtNumberException;
 use App\Repository\TeamRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -82,12 +84,12 @@ class Team
             if ($this->teamRosters->exists(function ($key, $element) use ($teamRoster) {
                 return $element->getPlayer() === $teamRoster->getPlayer();
             })) {
-                throw new \DomainException('Cannot add same players twice');
+                throw new SamePlayerTwiceException('Cannot add same player twice');
             }
             if ($this->teamRosters->exists(function ($key, $element) use ($teamRoster) {
                 return $element->getShirtNumber() === $teamRoster->getShirtNumber();
             })) {
-                throw new \DomainException('Cannot add two players with same shirt number.');
+                throw new TwoPlayersSameShirtNumberException('Cannot add two players with same shirt number.');
             }
             $this->teamRosters->add($teamRoster);
         }
