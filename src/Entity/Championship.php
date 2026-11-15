@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Enum\ChampionshipStatus;
+use App\Exception\Domain\InvalidChampionshipPeriodException;
+use App\Exception\Domain\TeamAndChampionshipDifferentSportsException;
 use App\Repository\ChampionshipRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -103,13 +105,13 @@ class Championship
             return $dateEnd;
         }
 
-        throw new \InvalidArgumentException('Date start must be less than date end');
+        throw new InvalidChampionshipPeriodException('Date start must be less than date end');
     }
 
     public function enrollTeam(Team $team): Registration
     {
         if ($this->sport !== $team->getSport()) {
-            throw new \InvalidArgumentException('The team and the championship belong to different sports.');
+            throw new TeamAndChampionshipDifferentSportsException('The team and the championship belong to different sports.');
         }
 
         $registration = new Registration($team, $this);

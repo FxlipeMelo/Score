@@ -5,6 +5,8 @@ namespace App\Tests\Entity;
 use App\Entity\Championship;
 use App\Entity\Registration;
 use App\Enum\RegistrationStatus;
+use App\Exception\Domain\InvalidChampionshipPeriodException;
+use App\Exception\Domain\TeamAndChampionshipDifferentSportsException;
 use App\Tests\Mother\ChampionshipMother;
 use App\Tests\Mother\SportMother;
 use App\Tests\Mother\TeamMother;
@@ -21,7 +23,7 @@ class ChampionshipTest extends TestCase
 
     public function testFinishChampionshipBeforeStartDateThrowsException()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidChampionshipPeriodException::class);
 
         $championship = ChampionshipMother::create(dateEnd: new \DateTimeImmutable('2025-05-01'));
     }
@@ -34,7 +36,7 @@ class ChampionshipTest extends TestCase
         $team = TeamMother::create(sport: $sport1);
         $championship = ChampionshipMother::create(sport: $sport2);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(TeamAndChampionshipDifferentSportsException::class);
 
         $championship->enrollTeam($team);
     }
