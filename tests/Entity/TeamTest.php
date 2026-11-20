@@ -3,6 +3,8 @@
 namespace App\Tests\Entity;
 
 use App\Entity\Team;
+use App\Exception\Domain\SamePlayerTwiceException;
+use App\Exception\Domain\TwoPlayersSameShirtNumberException;
 use App\Tests\Mother\PlayerMother;
 use App\Tests\Mother\TeamMother;
 use App\Tests\Mother\TeamRosterMother;
@@ -19,7 +21,7 @@ class TeamTest extends TestCase
 
     public function testCannotAddTwoPlayersWithSameShirtNumber()
     {
-        $this->expectException(\DomainException::class);
+        $this->expectException(TwoPlayersSameShirtNumberException::class);
 
         $team = TeamMother::create();
         $player1 = PlayerMother::create(name: 'Player 1');
@@ -34,7 +36,7 @@ class TeamTest extends TestCase
 
     public function testCannotAddSamePlayerTwiceDomainException()
     {
-        $this->expectException(\DomainException::class);
+        $this->expectException(SamePlayerTwiceException::class);
 
         $team = TeamMother::create();
         $player = PlayerMother::create(name: 'Player 1');

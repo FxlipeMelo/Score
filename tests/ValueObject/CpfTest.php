@@ -2,6 +2,7 @@
 
 namespace App\Tests\ValueObject;
 
+use App\Exception\Domain\InvalidCpfException;
 use App\ValueObject\Cpf;
 use PHPUnit\Framework\TestCase;
 
@@ -9,9 +10,10 @@ class CpfTest extends TestCase
 {
     public function testCannotInstantiateWithInvalidCpf():void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidCpfException::class);
+        $this->expectExceptionMessageIs("Invalid 111.111.111-11 CPF");
 
-        $cpf = new Cpf('123');
+        $cpf = new Cpf('111.111.111-11');
     }
 
     public function testInstantiateWithValidCpf():void

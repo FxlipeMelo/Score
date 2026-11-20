@@ -15,19 +15,11 @@ class CreatePlayerHandler
 
     public function __invoke(CreatePlayerDTO $createPlayerDTO): Player
     {
-        try {
-            $cpf = new Cpf($createPlayerDTO->cpf);
-        } catch (\InvalidArgumentException $e) {
-            throw new \DomainException($e->getMessage());
-        }
+        $cpf = new Cpf($createPlayerDTO->cpf);
 
-        try {
-            $player = new Player($createPlayerDTO->name, $createPlayerDTO->birthDate, $createPlayerDTO->height, $cpf);
-            $this->entityManager->persist($player);
-            $this->entityManager->flush();
-        } catch (\InvalidArgumentException $e) {
-            throw new \DomainException($e->getMessage());
-        }
+        $player = new Player($createPlayerDTO->name, $createPlayerDTO->birthDate, $createPlayerDTO->height, $cpf);
+        $this->entityManager->persist($player);
+        $this->entityManager->flush();
 
         return $player;
     }

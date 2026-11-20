@@ -5,17 +5,17 @@ namespace App\Handler;
 use App\DTO\EnrollTeamDTO;
 use App\Entity\Championship;
 use App\Entity\Registration;
+use App\Exception\Application\TeamNotFoundException;
+use App\Exception\Domain\TeamIsRegisteredThisChampionshipException;
 use App\Repository\TeamRepository;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class EnrollTeamHandler
 {
     public function __construct(
         private readonly TeamRepository $teamRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly ValidatorInterface $validator,
     )
     {
     }
@@ -25,21 +25,16 @@ class EnrollTeamHandler
         $team = $this->teamRepository->find($enrollTeamDTO->teamId);
 
         if ($team === null) {
-            throw new \InvalidArgumentException('Team could not be found.');
+            throw new TeamNotFoundException('Team could not be found.');
         }
 
+        $enrollTeam = $championship->enrollTeam($team);
+
         try {
-            $enrollTeam = $championship->enrollTeam($team);
-            $errors = $this->validator->validate($enrollTeam);
-
-            if (count($errors) > 0) {
-                throw new \DomainException("Validation failed" . $errors[0]->getMessage());
-            }
-
             $this->entityManager->persist($enrollTeam);
             $this->entityManager->flush();
-        } catch (\InvalidArgumentException $e) {
-            throw new \DomainException($e->getMessage());
+        } catch (UniqueConstraintViolationException $e) {
+            throw new TeamIsRegisteredThisChampionshipException('This team is already registered for this championship.');
         }
 
         return $enrollTeam;

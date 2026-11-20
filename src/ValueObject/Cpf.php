@@ -2,13 +2,15 @@
 
 namespace App\ValueObject;
 
+use App\Exception\Domain\InvalidCpfException;
+
 class Cpf {
 
     private string $cpf;
     public function __construct(string $cpf)
     {
         if (!$this->validateCPF($cpf)) {
-            throw new \InvalidArgumentException('CPF Invalid');
+            throw new InvalidCpfException("Invalid $cpf CPF");
         }
 
         $this->cpf = $cpf;
@@ -26,6 +28,7 @@ class Cpf {
             return false;
         }
 
+        //method for calculating a CPF
         for ($t = 9; $t < 11; $t++) {
             for ($d = 0, $c = 0; $c < $t; $c++) {
                 $d += $cpf[$c] * (($t + 1) - $c);

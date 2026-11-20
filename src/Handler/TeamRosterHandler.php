@@ -5,6 +5,7 @@ namespace App\Handler;
 use App\DTO\TeamRosterDTO;
 use App\Entity\Team;
 use App\Entity\TeamRoster;
+use App\Exception\Application\PlayerNotFoundException;
 use App\Repository\PlayerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -22,7 +23,7 @@ class TeamRosterHandler
         $player = $this->playerRepository->find($teamRosterDTO->playerID);
 
         if ($player === null) {
-            throw new \InvalidArgumentException("Player not found");
+            throw new PlayerNotFoundException("Player not found");
         }
 
         $teamRoster = new TeamRoster($teamRosterDTO->shirtNumber, $team, $player);

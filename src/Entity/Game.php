@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Exception\Domain\HomeAndAwayRegistrationTheSameException;
+use App\Exception\Domain\TeamsRegisteredDifferentChampionshipException;
 use App\Repository\GameRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -24,6 +26,8 @@ class Game
 
     public function __construct(\DateTimeImmutable $dateGame, Registration $homeRegistration, Registration $awayRegistration)
     {
+        $this->assertHomeAndAwayRegistrationShouldBeDifferent($homeRegistration, $awayRegistration);
+        $this->assertAwayRegistrationSameChampionshipThatHomeRegistration($homeRegistration, $awayRegistration);
         $this->dateGame = $dateGame;
         $this->homeRegistration = $homeRegistration;
         $this->awayRegistration = $awayRegistration;
@@ -59,5 +63,19 @@ class Game
     public function getDateGame(): \DateTimeImmutable
     {
         return $this->dateGame;
+    }
+
+    private function assertAwayRegistrationSameChampionshipThatHomeRegistration(Registration $homeRegistration, Registration $awayRegistration): void
+    {
+        if ($homeRegistration->getChampionship() !== $awayRegistration->getChampionship()) {
+            throw new TeamsRegisteredDifferentChampionshipException('The home team is registered in a different championship than the away team.');
+        }
+    }
+
+    private function assertHomeAndAwayRegistrationShouldBeDifferent(Registration $homeRegistration, Registration $awayRegistration): void
+    {
+        if ($homeRegistration->getTeam() === $awayRegistration->getTeam()) {
+            throw new HomeAndAwayRegistrationTheSameException('The home team and away team are the same.');
+        }
     }
 }
