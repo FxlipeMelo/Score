@@ -15,10 +15,10 @@ class Game
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Registration::class, inversedBy: 'matches')]
+    #[ORM\ManyToOne(targetEntity: Registration::class)]
     private Registration $homeRegistration;
 
-    #[ORM\ManyToOne(targetEntity: Registration::class, inversedBy: 'matches')]
+    #[ORM\ManyToOne(targetEntity: Registration::class)]
     private Registration $awayRegistration;
 
     #[ORM\Column]
