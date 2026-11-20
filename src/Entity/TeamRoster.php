@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\TeamRosterRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -25,7 +23,7 @@ class TeamRoster
     #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'teamRosters')]
     private Team $team;
 
-    #[ORM\ManyToOne(targetEntity: Player::class, inversedBy: 'teamRoster')]
+    #[ORM\ManyToOne(targetEntity: Player::class, inversedBy: 'teamRosters')]
     private Player $player;
 
     public function __construct(int $shirtNumber, Team $team, Player $player)
